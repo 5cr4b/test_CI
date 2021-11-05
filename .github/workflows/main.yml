@@ -1,0 +1,21 @@
+name: test_ci
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on:  ubuntu-latest
+    
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        
+      - name: push docker
+        uses: mr-smithers-excellent/docker-build-push@v5
+        with: 
+          image: test_ci/test_ci
+          registry: docker.io
+          username: ${{secret.DOCKER_USERNAME}}
+          password: ${{secret.DOCKER_PASSWORD}}
