@@ -26,7 +26,7 @@ jobs:
         name: docker build push tag
         id: docker_build
         with:
-          context: ./test_ci
+          context: ./
           file: ./dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
