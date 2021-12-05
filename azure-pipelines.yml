@@ -1,21 +1,40 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
 
 trigger:
 - master
+- develop
+- feature/*
+- release/*
+- bugfix/*
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+stages:
+  - stage: build & push docker regist
+    displayName: build container
+    jobs:
+      - job: build
+        displayName:  build
+        steps:
+        - task: DockerCompose@0
+          displayName: start build
+          inputs:
+            containerregistrytype: 'Azure Container Registry'
+            azureContainerRegistry: '{"loginServer":"webappazure.azurecr.io", "id" : "/subscriptions/3cf52e13-f68d-463d-af86-751d86b6ef37/resourceGroups/nodejs/providers/Microsoft.ContainerRegistry/registries/webAppAzure"}'
+            dockerComposeFile: '**/docker-compose.yml'
+            action: 'Build services'
+
+      - job:  push
+        displayName: azure push to docker registry
+        steps:
+          - task: DockerCompose@0
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: '{"loginServer":"webappazure.azurecr.io", "id" : "/subscriptions/3cf52e13-f68d-463d-af86-751d86b6ef37/resourceGroups/nodejs/providers/Microsoft.ContainerRegistry/registries/webAppAzure"}'
+              dockerComposeFile: '**/docker-compose.yml'
+              action: 'Push services'
